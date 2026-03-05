@@ -217,143 +217,223 @@ Below is the same YAML, explained in a “code (left) → meaning (right)” sty
 
 > Tip: YAML spacing matters. Indentation controls structure.
 
-## 1) Workflow name
-| YAML (left) | Meaning (right) |
-|---|---|
-| `name: Python CI` | The display name you will see in the **Actions** tab. You can name it anything like “CI”, “Tests”, etc. |
+# How the YAML File Works
 
-## 2) Triggers (`on:`) — When should CI run?
-| YAML (left) | Meaning (right) |
-|---|---|
-| ```yaml
+## Workflow Name
+
+```
+name: Python CI
+```
+
+This is the name shown inside the GitHub Actions dashboard.
+
+---
+
+## Trigger Section
+
+```
 on:
   push:
     branches: ["main"]
+
   pull_request:
     branches: ["main"]
-``` | **Trigger events**. This workflow runs automatically when: (1) you **push** to `main`, (2) you open/update a **pull request** targeting `main`. |
+```
 
-**Why this matters:**  
-- Push trigger protects `main` by constantly checking it.
-- PR trigger ensures code is tested **before merge**.
+This tells GitHub when the pipeline should run.
 
-## 3) Jobs (`jobs:`) — What work will run?
-| YAML (left) | Meaning (right) |
-|---|---|
-| ```yaml
+The workflow starts automatically when:
+
+• code is pushed to the main branch
+• a pull request is opened to the main branch
+
+---
+
+## Jobs Section
+
+```
 jobs:
   test:
-    ...
-``` | A workflow can have **multiple jobs** (build, test, lint, deploy). Here we define one job named `test`. |
+```
 
-## 4) Runner machine (`runs-on:`) — Where does it run?
-| YAML (left) | Meaning (right) |
-|---|---|
-| `runs-on: ubuntu-latest` | GitHub starts a fresh **Ubuntu Linux VM** for this job. Every run begins clean (no leftover files). |
+A workflow can contain multiple jobs.
 
-## 5) Matrix strategy — Run on multiple Python versions
-| YAML (left) | Meaning (right) |
-|---|---|
-| ```yaml
+Example:
+
+* build
+* test
+* deploy
+
+Here we only define one job called **test**.
+
+---
+
+## Runner Machine
+
+```
+runs-on: ubuntu-latest
+```
+
+GitHub launches a fresh Linux virtual machine to run the pipeline.
+
+This ensures:
+
+• reproducible builds
+• clean environment
+• no dependency conflicts
+
+---
+
+## Matrix Strategy
+
+```
 strategy:
   matrix:
     python-version: ["3.10", "3.11", "3.12"]
-``` | Creates **3 parallel runs**: one per Python version. If one version fails, you will see that version’s job fail. |
+```
 
-## 6) Steps — The exact instructions the robot follows
-Inside a job, `steps:` are executed **top to bottom**.
+This allows testing the code with multiple Python versions.
 
-### Step A — Checkout code
-| YAML (left) | Meaning (right) |
-|---|---|
-| ```yaml
-- name: Checkout repository
-  uses: actions/checkout@v4
-``` | Downloads your repository into the runner VM. Without checkout, the runner has **no code**. |
+GitHub will automatically run **three parallel jobs**.
 
-### Step B — Install Python
-| YAML (left) | Meaning (right) |
-|---|---|
-| ```yaml
-- name: Set up Python
-  uses: actions/setup-python@v5
-  with:
-    python-version: ${{ matrix.python-version }}
-``` | Installs Python version from the matrix. `${{ ... }}` is GitHub Actions expression syntax. |
+Example:
 
-### Step C — Install dependencies
-| YAML (left) | Meaning (right) |
-|---|---|
-| ```yaml
-- name: Install dependencies
-  run: |
-    python -m pip install --upgrade pip
-    pip install -r requirements.txt
-``` | Runs shell commands: upgrades pip and installs packages from `requirements.txt` (pytest). |
+Job 1 → Python 3.10
+Job 2 → Python 3.11
+Job 3 → Python 3.12
 
-### Step D — Run tests
-| YAML (left) | Meaning (right) |
-|---|---|
-| ```yaml
-- name: Run tests
-  run: |
-    pytest -q
-``` | Executes pytest. If tests fail, the job is marked ❌ failed. If tests pass, ✅ success. |
+If any job fails, CI fails.
 
 ---
 
-## 7) Where to see results in GitHub
-- Open your repository on GitHub
-- Click the **Actions** tab
-- Click the latest workflow run
-- Open job logs to see exact commands and error messages
+## Steps Section
+
+Steps define the commands executed sequentially.
+
+### Step 1: Checkout repository
+
+```
+uses: actions/checkout@v4
+```
+
+This downloads your repository into the runner machine.
+
+Without this step, the CI machine would not have your code.
 
 ---
 
-## Step 6 — Push Workflow and Watch CI Run
+### Step 2: Install Python
 
-```bash
+```
+uses: actions/setup-python@v5
+```
+
+This installs Python on the CI machine.
+
+The version is selected from the matrix.
+
+---
+
+### Step 3: Install Dependencies
+
+```
+pip install -r requirements.txt
+```
+
+This installs all packages required for the project.
+
+---
+
+### Step 4: Run Tests
+
+```
+pytest -q
+```
+
+This executes all test cases.
+
+If any test fails:
+
+CI status → ❌ Failed
+
+If all tests pass:
+
+CI status → ✅ Success
+
+---
+
+# 9. Push Workflow to GitHub
+
+```
 git add .github/workflows/ci.yml
-git commit -m "Add GitHub Actions CI"
+
+git commit -m "add github actions workflow"
+
 git push
 ```
 
-Now open GitHub → **Actions** tab and you will see the pipeline running.
+---
+
+# 10. View CI Results
+
+Open repository on GitHub.
+
+Click:
+
+```
+Actions
+```
+
+You will see the CI pipeline running automatically.
 
 ---
 
-## Step 7 — Demonstrate CI Failure (PR demo)
+# 11. Demonstrate CI Failure
 
-1. Create a branch:
-   ```bash
-   git checkout -b bug-demo
-   ```
-2. Introduce a bug (example: in `add`, change `a + b` to `a - b`)
-3. Commit + push:
-   ```bash
-   git add .
-   git commit -m "Introduce bug for CI demo"
-   git push -u origin bug-demo
-   ```
-4. Open a **Pull Request** from `bug-demo` → `main`
+Create a new branch.
 
-CI will run automatically on the PR and fail ❌.
+```
+git checkout -b bug-demo
+```
 
-5. Fix the bug, push again → CI becomes green ✅.
+Break the code intentionally.
+
+Example:
+
+```
+return a + b
+```
+
+change to
+
+```
+return a - b
+```
+
+Push the branch and open a Pull Request.
+
+CI will fail.
+
+Fix the bug → push again → CI becomes green.
 
 ---
 
-## Learning Outcomes
-Students will understand:
-- How CI triggers run on push and pull requests
-- How the YAML workflow defines jobs and steps
-- How GitHub Actions installs dependencies and runs tests
-- How failures appear in logs and block merges (in real projects)
+# Learning Outcomes
+
+Students learn:
+
+• Git workflow
+• automated testing
+• GitHub Actions pipeline
+• continuous integration
+• pull request validation
 
 ---
 
-## Optional Extensions (Next Lab)
-- Add `flake8` linting (code style checks)
-- Add coverage (`pytest-cov`) and print coverage percent
-- Add a README badge for CI status
-- Add a “deploy job” that runs only if tests pass
+# Extension Exercises
+
+1. Add power(a,b) function
+2. Add test coverage
+3. Add flake8 code linting
+4. Add Docker build step
+5. Add deployment pipeline
