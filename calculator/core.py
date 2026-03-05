@@ -4,7 +4,7 @@ def add(a: float, b: float) -> float:
     return a + b
 
 def subtract(a: float, b: float) -> float:
-    return a - b
+    return a - b +1
 
 def multiply(a: float, b: float) -> float:
     return a * b
@@ -28,4 +28,5 @@ def safe_eval(a: float, op: str, b: float) -> float:
         raise ValueError(f"Unsupported operator: {op}")
 
     return ops[op](a, b)
+
 
