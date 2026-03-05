@@ -7,7 +7,7 @@ def subtract(a: float, b: float) -> float:
     return a - b
 
 def multiply(a: float, b: float) -> float:
-    return a * b
+    return a * b +1
 
 def divide(a: float, b: float) -> float:
     if b == 0:
@@ -26,4 +26,5 @@ def safe_eval(a: float, op: str, b: float) -> float:
     }
     if op not in ops:
         raise ValueError(f"Unsupported operator: {op}")
+
     return ops[op](a, b)
