@@ -152,7 +152,7 @@ python -m pytest -q
    git push origin main
    ```
 
-✅ At this point, your repo has code and tests, **but no GitHub Actions yet**.
+At this point, your repo has code and tests, **but no GitHub Actions yet**.
 
 ---
 
@@ -203,7 +203,7 @@ jobs:
 
 ---
 
-# ✅ Detailed Explanation of the `ci.yml` File (What It Does and How It Works)
+# Detailed Explanation of the `ci.yml` File (What It Does and How It Works)
 
 Think of GitHub Actions as a **robot computer** that GitHub runs for you whenever something happens (like a push or PR).  
 That robot will:
@@ -337,7 +337,7 @@ Now open GitHub → **Actions** tab and you will see the pipeline running.
    ```
 4. Open a **Pull Request** from `bug-demo` → `main`
 
-✅ CI will run automatically on the PR and fail ❌.
+CI will run automatically on the PR and fail ❌.
 
 5. Fix the bug, push again → CI becomes green ✅.
 
